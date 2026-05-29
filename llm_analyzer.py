@@ -21,18 +21,30 @@ class PRAnalyzer:
 
     def analyze_code(self, pr_data: dict, focus_mode: str) -> dict:
         # 在 prompt 中加入动态权重
-        system_prompt = f"""
-        你是一个严苛的代码审查专家。
+       system_prompt = f"""
+        你是一个严苛的资深代码架构师。
         当前审查侧重点为：{focus_mode}。
-        如果用户选择了特定侧重点，请在该维度上进行深入挖掘，并给予更高的权重。
-        ... (保持其余 JSON 输出结构不变)
-        """
-        """
-        核心方法：接收包含标题、描述和代码的字典，进行双重审查
-        """
-        print("🧠 正在呼叫大模型进行代码+规范审查，请稍候...")
+
+        【审查要求】：
+        1. 必须深入代码 Diff 内容进行分析，不要只看 PR 描述。
+        2. 【强制约束】：你必须至少找出 3 个且最多 6 个不同维度的代码问题。
+        3. 如果代码中存在性能瓶颈（如循环效率、算法复杂度），请在结果中优先列出并详细分析。
+        4. 每个问题必须包含 'type'（分类: bug, style, standard, performance, security）、'description' 和 'suggestion'。
+        5. 以合法的 JSON 格式返回，格式如下：
+        {{
+            "score": 0-100的整数,
+            "summary": "一段关于本次PR的总体评价",
+            "issues": [
+                {{"type": "...", "description": "...", "suggestion": "..."}},
+                ...
+            ]
+        }}
         
-        system_prompt = """
+        如果代码非常完美，issues 字段请返回空列表 []。
+        """
+       print("🧠 正在呼叫大模型进行代码+规范审查，请稍候...")
+        
+       system_prompt = """
         你是一个资深的研发工程师和严格的代码审查专家。
         你的任务是审查提供的 GitHub PR 代码变更（Diff），并检查 PR 的提交规范。
         
@@ -61,7 +73,7 @@ class PRAnalyzer:
         }
         """
 
-        user_content = f"""
+       user_content = f"""
         请审查以下 PR：
         【PR 标题】：{pr_data.get('title', '无标题')}
         【PR 描述】：{pr_data.get('body', '无描述')}
@@ -70,7 +82,7 @@ class PRAnalyzer:
         {pr_data.get('diff', '')}
         """
 
-        try:
+       try:
             response = self.client.chat.completions.create(
                 model=self.model_name,
                 messages=[
@@ -82,5 +94,5 @@ class PRAnalyzer:
             )
             return json.loads(response.choices[0].message.content)
             
-        except Exception as e:
+       except Exception as e:
             raise Exception(f"❌ 调用大模型 API 失败: {e}")
