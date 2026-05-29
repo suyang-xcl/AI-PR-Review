@@ -7,6 +7,21 @@
 👉 **[https://ai-pr-review-lxz6lxgzqydu6bbsjiglzr.streamlit.app/]**
 
 ### 💡 功能特性
-* 接入 GitHub API，支持实时获取 PR 差异 (Diff)。
-* 集成 DeepSeek 大模型，不仅能查 Bug，还能检查 PR 标题与描述是否规范。
-* 支持多维度审查结果可视化。
+* **GitHub API 集成**：实时获取 PR 的标题、描述与代码 Diff。
+* **智能审查**：利用大模型分析 Bug，并强制检查提交规范（如 `feat:`, `fix:` 等）。
+* **交互友好**：支持一键随机演示，错误处理机制完善。
+
+### ⚙️ 系统架构
+```mermaid
+sequenceDiagram
+    participant User as 用户
+    participant App as AI PR Reviewer
+    participant GitHub as GitHub API
+    participant DeepSeek as AI 模型
+
+    User->>App: 提交 PR 链接
+    App->>GitHub: 获取 PR 标题/描述/代码Diff
+    GitHub-->>App: 返回数据
+    App->>DeepSeek: 发送审查请求
+    DeepSeek-->>App: 返回 JSON 格式评审报告
+    App-->>User: 渲染审查结果
