@@ -2,18 +2,11 @@ import streamlit as st
 from github_client import GitHubPRFetcher
 from llm_analyzer import PRAnalyzer
 
-# ==========================================
-# 1. 网页全局设置
-# ==========================================
 st.set_page_config(page_title="AI PR Reviewer", page_icon="🤖", layout="centered")
 
 st.title("🤖 自动代码审查助手")
-st.markdown("输入一个 GitHub PR 链接，让大模型帮你一键找出 Bug！")
+st.markdown("输入一个 GitHub PR 链接，让大模型帮你一键查 Bug + 查规范！")
 
-# ==========================================
-# 2. 初始化核心组件
-# ==========================================
-# 使用 st.cache_resource 防止每次点击按钮都重新初始化
 @st.cache_resource
 def get_fetcher():
     return GitHubPRFetcher()
@@ -25,36 +18,26 @@ def get_analyzer():
 fetcher = get_fetcher()
 analyzer = get_analyzer()
 
-# ==========================================
-# 3. 画 UI 界面
-# ==========================================
-# 输入框
-pr_url = st.text_input("🔗 请输入 GitHub PR 链接:", placeholder="例如: https://github.com/tiangolo/fastapi/pull/10000")
+pr_url = st.text_input("🔗 请输入 GitHub PR 链接:", placeholder="例如: [https://github.com/tiangolo/fastapi/pull/10000](https://github.com/tiangolo/fastapi/pull/10000)")
 
-# 按钮
 if st.button("🚀 开始 AI 审查", type="primary"):
     if not pr_url:
         st.warning("请先输入链接哦！")
     else:
         try:
-            # 第一阶段：拉取代码
-            with st.spinner('正在潜入 GitHub 抓取代码变更...'):
-                diff_text = fetcher.fetch_pr_diff(pr_url)
+            with st.spinner('正在潜入 GitHub 抓取 PR 信息...'):
+                # 调用升级后的方法，拿到字典
+                pr_data = fetcher.fetch_pr_details(pr_url)
             
-            st.success(f"✅ 成功抓取代码！过滤后一共 {len(diff_text)} 字符。")
+            st.success(f"✅ 成功抓取！标题：{pr_data['title']}")
 
-            # 第二阶段：AI 分析
-            with st.spinner('大模型正在玩命阅读代码，请稍候...'):
-                report = analyzer.analyze_code(diff_text)
+            with st.spinner('大模型正在进行代码 + 规范双重审查，请稍候...'):
+                # 把整个字典传给大模型
+                report = analyzer.analyze_code(pr_data)
             
             st.success("🎉 AI 审查完毕！")
             
-            # ==========================================
-            # 4. 漂亮地展示结果
-            # ==========================================
             st.markdown("---")
-            
-            # 顶部展示分数和总结
             col1, col2 = st.columns([1, 3])
             with col1:
                 st.metric(label="🌟 AI 评分", value=f"{report.get('score', 'N/A')} 分")
@@ -64,17 +47,19 @@ if st.button("🚀 开始 AI 审查", type="primary"):
 
             st.markdown("### 🔍 发现的问题")
             
-            # 循环展示每一个 issue
-            for idx, issue in enumerate(report.get('issues', [])):
-                # 根据问题类型给个不同的表情
-                icon = "🐛" if issue['type'] == 'bug' else "💅" if issue['type'] == 'style' else "⚡"
-                
-                # 用扩展面板展示
-                with st.expander(f"{icon} 问题 {idx + 1}: [{issue['type'].upper()}] {issue['description'][:30]}..."):
-                    st.markdown("**详细描述：**")
-                    st.write(issue['description'])
-                    st.markdown("**💡 建议：**")
-                    st.info(issue['suggestion'])
+            issues = report.get('issues', [])
+            if not issues:
+                st.info("太棒了！大模型没有发现任何代码 Bug 和规范问题，满分通过！💯")
+            else:
+                for idx, issue in enumerate(issues):
+                    # 专属图标判断逻辑
+                    icon = "🐛" if issue['type'] == 'bug' else "💅" if issue['type'] == 'style' else "👮‍♂️" if issue['type'] == 'standard' else "⚡"
+                    
+                    with st.expander(f"{icon} 问题 {idx + 1}: [{issue['type'].upper()}] {issue['description'][:30]}..."):
+                        st.markdown("**详细描述：**")
+                        st.write(issue['description'])
+                        st.markdown("**💡 建议：**")
+                        st.info(issue['suggestion'])
                     
         except Exception as e:
             st.error(f"发生错误啦：\n{e}")
