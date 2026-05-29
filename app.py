@@ -48,8 +48,12 @@ if st.button("🚀 开始 AI 审查", type="primary"):
             st.success(f"✅ 成功抓取！标题：{pr_data['title']}")
 
             with st.spinner('大模型正在进行深度审查...'):
-                # 传入选定的审查模式
                 report = analyzer.analyze_code(pr_data, focus_mode)
+                
+            # --- 关键调试：把这行加进去 ---
+            st.warning(f"DEBUG (临时): AI 原始数据长度: {len(report.get('issues', []))}")
+            st.json(report) # 直接在网页上显示解析后的完整数据
+            # ----------------------------
             
             st.success("🎉 AI 审查完毕！")
             
