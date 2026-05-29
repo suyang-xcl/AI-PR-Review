@@ -18,10 +18,10 @@ st.title("🤖 自动代码审查助手")
 st.markdown("输入一个 GitHub PR 链接，让 AI 帮你一键查 Bug + 查规范！")
 
 # @st.cache_resource
-# def get_fetcher():
-#     return GitHubPRFetcher()
+def get_fetcher():
+    return GitHubPRFetcher()
 
-@st.cache_resource
+# @st.cache_resource
 def get_analyzer():
     return PRAnalyzer()
 
