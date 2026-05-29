@@ -22,26 +22,18 @@ class PRAnalyzer:
     def analyze_code(self, pr_data: dict, focus_mode: str) -> dict:
         # 在 prompt 中加入动态权重
        system_prompt = f"""
-        你是一个严苛的资深代码架构师。
-        当前审查侧重点为：{focus_mode}。
+你是一位资深代码架构师。请遵循以下步骤进行审查：
 
-        【审查要求】：
-        1. 必须深入代码 Diff 内容进行分析，不要只看 PR 描述。
-        2. 【强制约束】：你必须至少找出 3 个且最多 6 个不同维度的代码问题。
-        3. 如果代码中存在性能瓶颈（如循环效率、算法复杂度），请在结果中优先列出并详细分析。
-        4. 每个问题必须包含 'type'（分类: bug, style, standard, performance, security）、'description' 和 'suggestion'。
-        5. 以合法的 JSON 格式返回，格式如下：
-        {{
-            "score": 0-100的整数,
-            "summary": "一段关于本次PR的总体评价",
-            "issues": [
-                {{"type": "...", "description": "...", "suggestion": "..."}},
-                ...
-            ]
-        }}
-        
-        如果代码非常完美，issues 字段请返回空列表 []。
-        """
+步骤 1：先对代码进行全局分析，总结性能瓶颈、潜在Bug和规范问题（至少找出3个点）。
+步骤 2：将这些点填入下方的 JSON 结构中。
+
+侧重点：{focus_mode}
+
+要求：
+- 请严格列出至少 3 个问题。
+- 如果某个类别（如性能）确实没有问题，请写明“暂无性能瓶颈”，但总问题数不得少于 3 个。
+- 必须返回完整 JSON。
+"""
        print("🧠 正在呼叫大模型进行代码+规范审查，请稍候...")
         
        system_prompt = """
@@ -90,9 +82,13 @@ class PRAnalyzer:
                     {"role": "user", "content": user_content}
                 ],
                 response_format={"type": "json_object"}, 
-                temperature=0.3 
+                temperature=0.8
             )
             return json.loads(response.choices[0].message.content)
-            
+            # 在调用模型返回结果的地方加一行
+            response = llm_client.chat(...)
+            print(f"DEBUG: AI 原始返回内容是: {response}")
+            # 在你的 print(f"DEBUG: AI 原始返回内容是: {response}") 下方添加：
+            print(f"DEBUG: 解析出的 issues 长度: {len(report.get('issues', []))}")
        except Exception as e:
             raise Exception(f"❌ 调用大模型 API 失败: {e}")
