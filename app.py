@@ -79,9 +79,24 @@ if st.button("🚀 开始 AI 审查", type="primary"):
                         'performance': '⚡',
                         'security': '🛡️'
                     }
-                    icon = type_icon.get(issue.get('type', ''), '⚡')
+                    # --- 把下面这段代码粘在 for 循环结束的后面 ---
+            st.markdown("---")
+            
+            # 整理数据为 Markdown 文本
+            markdown_report = f"# 代码审查报告\n\n**审查深度**: {focus_mode}\n**AI 评分**: {report.get('score', 'N/A')} 分\n\n## 总结\n{report.get('summary', '无')}\n\n## 发现的问题\n"
+            for issue in issues:
+                markdown_report += f"- **{issue.get('type', '').upper()}**: {issue.get('description', '')}\n  *建议: {issue.get('suggestion', '')}*\n\n"
+
+            # 导出按钮
+            st.download_button(
+                label="📥 下载审查报告 (Markdown)",
+                data=markdown_report,
+                file_name="pr_review_report.md",
+                mime="text/markdown",
+            )
+            icon = type_icon.get(issue.get('type', ''), '⚡')
                     
-                    with st.expander(f"{icon} 问题 {idx + 1}: [{issue.get('type', 'info').upper()}] {issue.get('description', '')[:30]}..."):
+            with st.expander(f"{icon} 问题 {idx + 1}: [{issue.get('type', 'info').upper()}] {issue.get('description', '')[:30]}..."):
                         st.markdown("**详细描述：**")
                         st.write(issue.get('description', ''))
                         st.markdown("**💡 建议：**")
