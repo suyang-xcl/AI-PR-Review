@@ -55,19 +55,21 @@ if st.button("🚀 开始 AI 审查", type="primary"):
             st.markdown("**📝 总结：**")
             st.write(report.get('summary', '无'))
 
-            # 展示发现的问题
+            # --- 这一段代码替换你 app.py 中原有的循环展示逻辑 ---
             st.markdown("### 🔍 发现的问题")
             issues = report.get('issues', [])
             
             if not issues:
-                st.info("太棒了！AI 没有发现任何代码 Bug！💯")
+                st.info("太棒了！AI 没有发现任何代码 Bug 或规范问题！💯")
             else:
-                for idx, issue in enumerate(issues):
-                    type_icon = {'bug': '🐛', 'style': '💅', 'standard': '👮‍♂️', 'performance': '⚡', 'security': '🛡️'}
-                    issue_type = issue.get('type', 'info')
-                    icon = type_icon.get(issue_type, '⚡')
+                # 使用一个纯净的循环，确保把 issues 列表里的每一个元素都渲染出来
+                for i in range(len(issues)):
+                    issue = issues[i]
+                    # 获取类型图标，如果找不到就用默认值
+                    icon = {'bug': '🐛', 'style': '💅', 'standard': '👮‍♂️', 'performance': '⚡', 'security': '🛡️'}.get(issue.get('type', '').lower(), '🔍')
                     
-                    with st.expander(f"{icon} 问题 {idx + 1}: [{issue_type.upper()}] {issue.get('description', '')[:40]}..."):
+                    # 确保每一个 expander 都是独立的
+                    with st.expander(f"{icon} 问题 {i + 1}: {issue.get('description', '')[:30]}..."):
                         st.markdown("**详细描述：**")
                         st.write(issue.get('description', ''))
                         st.markdown("**💡 建议：**")
