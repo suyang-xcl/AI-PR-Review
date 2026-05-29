@@ -19,6 +19,16 @@ fetcher = get_fetcher()
 analyzer = get_analyzer()
 
 pr_url = st.text_input("🔗 请输入 GitHub PR 链接:", placeholder="例如: [https://github.com/tiangolo/fastapi/pull/10000](https://github.com/tiangolo/fastapi/pull/10000)")
+# --- 增加：一键体验按钮 ---
+if st.button("✨ 帮我随机体验一个真实开源 PR"):
+    # 这里放一个你觉得最具代表性的、不规范的 PR 链接
+    st.session_state.pr_url = "https://github.com/tiangolo/fastapi/pull/10000"
+else:
+    # 默认值处理
+    st.session_state.setdefault('pr_url', "")
+
+# 绑定输入框的 value 到 session_state
+pr_url = st.text_input("🔗 请输入 GitHub PR 链接:", value=st.session_state.pr_url, placeholder="例如: https://github.com/tiangolo/fastapi/pull/10000")
 
 if st.button("🚀 开始 AI 审查", type="primary"):
     if not pr_url:
@@ -62,4 +72,7 @@ if st.button("🚀 开始 AI 审查", type="primary"):
                         st.info(issue['suggestion'])
                     
         except Exception as e:
-            st.error(f"发生错误啦：\n{e}")
+            # --- 优化：人性化的错误提示 ---
+            st.error("哎呀，审查遇到了小阻碍：")
+            st.caption(f"具体原因: {e}")
+            st.info("💡 小贴士：请检查链接是否正确，或者该 PR 是否已经合并？如果是网络问题，请重试一下哦！")
