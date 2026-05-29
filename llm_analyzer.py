@@ -19,7 +19,14 @@ class PRAnalyzer:
         )
         self.model_name = "deepseek-chat"
 
-    def analyze_code(self, pr_data: dict) -> dict:
+    def analyze_code(self, pr_data: dict, focus_mode: str) -> dict:
+        # 在 prompt 中加入动态权重
+        system_prompt = f"""
+        你是一个严苛的代码审查专家。
+        当前审查侧重点为：{focus_mode}。
+        如果用户选择了特定侧重点，请在该维度上进行深入挖掘，并给予更高的权重。
+        ... (保持其余 JSON 输出结构不变)
+        """
         """
         核心方法：接收包含标题、描述和代码的字典，进行双重审查
         """
