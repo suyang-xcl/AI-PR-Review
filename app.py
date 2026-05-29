@@ -74,8 +74,8 @@ if st.button("🚀 开始 AI 审查", type="primary"):
             if not issues:
                 st.info("太棒了！AI 没有发现任何代码 Bug 或规范问题！💯")
             else:
+                # --- 确保这里的循环没有被任何奇怪的 if 挡住 ---
                 for idx, issue in enumerate(issues):
-                    # 图标区分
                     type_icon = {
                         'bug': '🐛', 
                         'style': '💅', 
@@ -83,7 +83,16 @@ if st.button("🚀 开始 AI 审查", type="primary"):
                         'performance': '⚡',
                         'security': '🛡️'
                     }
-                    # --- 把下面这段代码粘在 for 循环结束的后面 ---
+                    # 确保 icon 获取安全
+                    issue_type = issue.get('type', 'info')
+                    icon = type_icon.get(issue_type, '⚡')
+                    
+                    # 使用 expander 展示每一个 issue
+                    with st.expander(f"{icon} 问题 {idx + 1}: [{issue_type.upper()}] {issue.get('description', '')[:30]}..."):
+                        st.markdown("**详细描述：**")
+                        st.write(issue.get('description', ''))
+                        st.markdown("**💡 建议：**")
+                        st.info(issue.get('suggestion', ''))
             st.markdown("---")
             
             # 整理数据为 Markdown 文本
