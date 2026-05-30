@@ -22,17 +22,11 @@ class PRAnalyzer:
     def analyze_code(self, pr_data: dict, focus_mode: str) -> dict:
         # 在 prompt 中加入动态权重
        system_prompt = f"""
-你是一位资深代码架构师。请遵循以下步骤进行审查：
-
-步骤 1：先对代码进行全局分析，总结性能瓶颈、潜在Bug和规范问题（至少找出3个点）。
-步骤 2：将这些点填入下方的 JSON 结构中。
-
-侧重点：{focus_mode}
-
-要求：
-- 请严格列出至少 3 个问题。
-- 如果某个类别（如性能）确实没有问题，请写明“暂无性能瓶颈”，但总问题数不得少于 3 个。
-- 必须返回完整 JSON。
+你是一个资深代码评审专家。
+1. 你的目标是审查 GitHub PR 代码。
+2. 每一个发现的问题，不仅要描述，还要提供 'fixed_code'，展示修复后的代码片段。
+3. 最多输出 6 个最核心的问题，并按严重程度排序。
+4. 必须输出完整的 JSON 结构。
 """
        print("🧠 正在呼叫大模型进行代码+规范审查，请稍候...")
         
@@ -82,6 +76,7 @@ class PRAnalyzer:
                     {"role": "user", "content": user_content}
                 ],
                 response_format={"type": "json_object"}, 
+                max_tokens=8192,
                 temperature=0.8
             )
             return json.loads(response.choices[0].message.content)

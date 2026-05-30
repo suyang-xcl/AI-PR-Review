@@ -74,6 +74,8 @@ if st.button("🚀 开始 AI 审查", type="primary"):
                         st.write(issue.get('description', ''))
                         st.markdown("**💡 建议：**")
                         st.info(issue.get('suggestion', ''))
+                        st.markdown("**💻 修复建议代码：**")
+                        st.code(issue.get('fixed_code'))
 
             # 报告导出功能
             st.markdown("---")
