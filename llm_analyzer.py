@@ -22,12 +22,21 @@ class PRAnalyzer:
     def analyze_code(self, pr_data: dict, focus_mode: str) -> dict:
         # 在 prompt 中加入动态权重
        system_prompt = f"""
-你是一个资深代码评审专家。
-1. 你的目标是审查 GitHub PR 代码。
+你是一个资深代码架构师。当前审查重点：{focus_mode}。
+
+【强制任务】：
+1. 深入分析代码，最多找出 6 个核心问题，按优先级降序排列。
 2. 每个问题必须包含：'type'（分类）, 'description'（分析）, 'suggestion'（建议）, 'fixed_code'（修复后的代码片段）。
-**注意：如果该问题不涉及具体代码修改（例如：PR标题不规范、文档缺失等），请务必将 'fixed_code' 字段设置为空字符串 ""，绝对不要写 "None" 或 "N/A"。**
-3. 最多输出 6 个最核心的问题，并按严重程度排序。
-4. 必须输出完整的 JSON 结构。
+3. ⚠️ 关于 fixed_code 的绝对指令：
+   - 只要该问题涉及代码、注释、配置文件的修改，**你必须在 'fixed_code' 中输出完整的修复后代码片段**！绝对不准偷懒！
+   - 如果是修改单行代码，请给出上下文。
+   - 只有当问题**仅仅**是关于 PR 标题格式、纯描述文字缺失时，'fixed_code' 才可以设为空字符串 ""。
+4. 必须返回符合此结构的 JSON：
+{{
+    "score": 0-100,
+    "summary": "...",
+    "issues": [ {{"type": "...", "description": "...", "suggestion": "...", "fixed_code": "..."}} ]
+}}
 """
        print("🧠 正在呼叫大模型进行代码+规范审查，请稍候...")
         
