@@ -74,12 +74,15 @@ if st.button("🚀 开始 AI 审查", type="primary"):
                         st.write(issue.get('description', ''))
                         st.markdown("**💡 建议：**")
                         st.info(issue.get('suggestion', ''))
-                        # --- 修改后：更严谨的拦截逻辑 ---
-                        fixed_code = issue.get('fixed_code', '').strip()
+                       # --- 修改后：更严谨的拦截逻辑 ---
+                        raw_code = issue.get('fixed_code')
+                        # 确保转换为字符串再去空格，防止 raw_code 是 None
+                        fixed_code = str(raw_code).strip() if raw_code else ""
+                        
                         # 过滤掉空的、写着 None 或者 N/A 的无效代码
                         if fixed_code and fixed_code.lower() not in ['none', 'n/a', 'null', '无']:
-                         st.markdown("**💻 修复建议代码：**")
-                         st.code(fixed_code, language='python') # 这里你也可以把 language 改成对应的语言，或者去掉让它自动高亮
+                            st.markdown("**💻 修复建议代码：**")
+                            st.code(fixed_code, language='python')
             # 报告导出功能
             st.markdown("---")
             md_content = f"# 代码审查报告\n\n**侧重**: {focus_mode}\n**评分**: {report.get('score')} 分\n\n## 总结\n{report.get('summary')}\n\n## 详情\n"
