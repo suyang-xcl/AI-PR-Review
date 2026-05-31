@@ -26,5 +26,9 @@ sequenceDiagram
     DeepSeek-->>App: 返回 JSON 格式评审报告
     App-->>User: 渲染审查结果
 
-Demo视频
+## 🎥 演示视频 (Demo Video)
+
+快速了解代码助手的核心功能，请点击下方链接观看演示视频：
+
+* 📺 **Bilibili 在线观看**：
 【AI代码助手 - 核心功能演示】https://www.bilibili.com/video/BV1SjVQ68EbP?vd_source=8ab476e8dfc703b2a54a1333667664de
