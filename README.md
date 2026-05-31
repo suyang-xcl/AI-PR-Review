@@ -25,3 +25,6 @@ sequenceDiagram
     App->>DeepSeek: 发送审查请求
     DeepSeek-->>App: 返回 JSON 格式评审报告
     App-->>User: 渲染审查结果
+
+Demo视频
+【AI代码助手 - 核心功能演示】https://www.bilibili.com/video/BV1SjVQ68EbP?vd_source=8ab476e8dfc703b2a54a1333667664de
