@@ -25,6 +25,7 @@ sequenceDiagram
     App->>DeepSeek: 发送审查请求
     DeepSeek-->>App: 返回 JSON 格式评审报告
     App-->>User: 渲染审查结果
+```
 
 ## 🎥 演示视频 (Demo Video)
 
